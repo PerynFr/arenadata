@@ -1,5 +1,7 @@
 ## Создай новый файл конфигурации, например, nginx-logrotate, в директории /etc/logrotate.d/:
 ```
+sudo yum install logrotate
+
 sudo nano /etc/logrotate.d/nginx
 ```
 ## Добавь следующие строки в файл nginx-logrotate:
