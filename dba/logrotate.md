@@ -12,7 +12,7 @@ sudo nano /etc/logrotate.d/nginx
     missingok
     notifempty
     create 0640 nginx nginx
-``
+```
 
 monthly: Указывает, что ротация должна выполняться раз в месяц.
 rotate 12: Хранит последние 12 архивных файлов логов.
