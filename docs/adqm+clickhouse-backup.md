@@ -100,5 +100,3 @@ sftp:
 
 
 
-
-[![Alt text](kisspng.png)](https://docs.arenadata.io/ru/ADQM/current/introduction/intro.html)
