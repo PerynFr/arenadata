@@ -3,6 +3,7 @@
 
 ### Оглавление
 
+0. [Тест и сравнение clickhouse-backup с другими](test_clickhouse_backup.pdf)
 1. [Установка clickhouse-backup](#установка)
 2. [Настройка clickhouse-backup](#настройка)
 3. [Резервное копирование и восстановление](#резервное-копирование-и-восстановление)
@@ -100,3 +101,5 @@ sftp:
 
 
 
+
+[![Alt text](kisspng.png)](https://docs.arenadata.io/ru/ADQM/current/introduction/intro.html)
