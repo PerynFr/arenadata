@@ -6,7 +6,8 @@
 - [Тест и сравнение clickhouse-backup с другими](test_clickhouse_backup.pdf)
 - [Установка clickhouse-backup](#установка)
 - [Настройка clickhouse-backup](#настройка)
-- [Резервное копирование и восстановление](#резервное-копирование-и-восстановление)
+- [Резервное копирование](#резервное-копирование)
+- [Восстановление](#восстановление)
 
 ---
 
@@ -198,8 +199,22 @@ sudo chown backupadmin /usr/local/bin/clickhouse-backup-run.sh
 sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
 ```
 
-### Резервное копирование и восстановление
+### Резервное копирование
 
+для полного локального резервного копирования:
+```
+/usr/local/bin/clickhouse-backup-run.sh full local
+```
+***локальное инкрементальное резервное копирование не предусмотрено***
+
+для полного резервного копирования в удаленное хранилище:
+```
+/usr/local/bin/clickhouse-backup-run.sh full remote
+```
+для инкрементального резервного копирования в удаленное хранилище:
+```
+/usr/local/bin/clickhouse-backup-run.sh incremental remote
+```
 под логином backupadmin
 создаем задачи в cron `crontab -e`
 ```
@@ -208,5 +223,9 @@ sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
 # Полное резервное копирование в 00:00 по воскресеньям.
 0 0 * * 0 /usr/local/bin/clickhouse-backup-run.sh full remote
 ```
+смотрим логи
+``` 
+tail -n 50 -f /var/log/clickhouse-backup.log
+```
 
-
+###  Восстановление
