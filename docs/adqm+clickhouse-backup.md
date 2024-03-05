@@ -126,7 +126,9 @@ sftp:
     key: "/var/lib/clickhouse/id_ed25519_backupadmin"
 ```
 
-размещаем скрипт в `sudo vim /usr/local/bin/clickhouse-backup-run.sh`  
+#### размещаем
+ скрипт в: 
+`sudo vim /usr/local/bin/clickhouse-backup-run.sh`  
 
 ```bash
 #!/bin/bash
@@ -229,3 +231,21 @@ tail -n 50 -f /var/log/clickhouse-backup.log
 ```
 
 ###  Восстановление
+
+смотрим историю бэкапов в удаленном хранилище
+
+```sh
+sudo -u backupadmin clickhouse-backup list remote
+```
+пример, + обозначает зависимость от предыдущего бэкапа, цепочку формирует скрипт выше  [clickhouse-backup-run.sh](#размещаем)
+
+|                                      |            |                      |                                                 |                 |
+|--------------------------------------|------------|----------------------|-------------------------------------------------|-----------------|
+| auto_full_2024-03-05T14-30-01        |  472.71MiB |  05/03/2024 14:30:11 |  remote                                         |   gzip, regular |
+| auto_incremental_2024-03-05T14-35-01 |  1.04MiB   |  05/03/2024 14:35:02 |  remote   +auto_full_2024-03-05T14-30-01        |   gzip, regular | 
+| auto_incremental_2024-03-05T14-40-01 |  1.04MiB   |  05/03/2024 14:40:02 |  remote   +auto_incremental_2024-03-05T14-35-01 |   gzip, regular |
+| auto_incremental_2024-03-05T14-45-01 |  1.04MiB   |  05/03/2024 14:45:02 |  remote   +auto_incremental_2024-03-05T14-40-01 |  gzip, regular  |
+| auto_incremental_2024-03-05T14-50-02 |  1.04MiB   |  05/03/2024 14:50:03 |  remote   +auto_incremental_2024-03-05T14-45-01 |  gzip, regular  |
+| auto_incremental_2024-03-05T14-55-01 |  1.04MiB   |  05/03/2024 14:55:02 |  remote   +auto_incremental_2024-03-05T14-50-02 |  gzip, regular  |
+| auto_incremental_2024-03-05T15-00-01 |  1.04MiB   |  05/03/2024 15:00:02 |  remote   +auto_incremental_2024-03-05T14-55-01 |  gzip, regular  |
+
