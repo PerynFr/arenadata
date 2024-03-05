@@ -3,10 +3,10 @@
 
 ### Оглавление
 
-0. [Тест и сравнение clickhouse-backup с другими](test_clickhouse_backup.pdf)
-1. [Установка clickhouse-backup](#установка)
-2. [Настройка clickhouse-backup](#настройка)
-3. [Резервное копирование и восстановление](#резервное-копирование-и-восстановление)
+- [Тест и сравнение clickhouse-backup с другими](test_clickhouse_backup.pdf)
+- [Установка clickhouse-backup](#установка)
+- [Настройка clickhouse-backup](#настройка)
+- [Резервное копирование и восстановление](#резервное-копирование-и-восстановление)
 
 ---
 
@@ -94,6 +94,23 @@ sftp:
     compression_level: 3
     concurrency: 4
     debug: true
+```
+
+создаем пользователя backupadmin в на хосте куда будут переноситься бэкапы и делаем его владельцем диррректории где будут хранится бэкапы
+```sh
+sudo chown backupadmin /backup_upload
+```
+создаем пользователя в системе backupadmin где расположена база, создаем ключ и копируем публичный ключ на хост где будут хранится бэкапы
+```sh
+sudo -u backupadmin ssh-keygen -t ed25519 -f /home/backupadmin/.ssh/id_ed25519_backupadmin
+ssh-copy-id -i /home/backupadmin/.ssh/id_ed25519_backupadmin.pub backupadmin@10.92.36.11
+```
+clickhouse-backup может работать от root или от имени сервисной учетной записи clickhouse  
+логин backupadmin будет запускать скрипт bash через крон, в скрипте будет вызов `sudo -u clickhouse clickhouse-backup`  
+чтобы это работало дадим права sudo
+```sh
+visudo
+backupadmin ALL=(ALL)  NOPASSWD: /bin/clickhouse-backup
 ```
 
 ## Резервное копирование и восстановление
