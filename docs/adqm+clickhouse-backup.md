@@ -237,7 +237,7 @@ tail -n 50 -f /var/log/clickhouse-backup.log
 ```sh
 sudo -u backupadmin clickhouse-backup list remote
 ```
-пример, + обозначает зависимость от предыдущего бэкапа, цепочку формирует скрипт выше  [clickhouse-backup-run.sh](#размещаем)
+знак "+" обозначает зависимость от предыдущего бэкапа, цепочку формирует скрипт выше  [clickhouse-backup-run.sh](#размещаем)
 
 |       name                           |  size      |  date                |  locate |  dependency name                       |  compression    |
 |--------------------------------------|------------|----------------------|---------|----------------------------------------|-----------------|
