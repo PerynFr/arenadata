@@ -3,7 +3,7 @@
 
 ### Оглавление
 
-- [Тест и сравнение clickhouse-backup с другими](test_clickhouse_backup.pdf)
+- [Тест и сравнение clickhouse-backup с Clickhouse Backup & Restore](test_clickhouse_backup.pdf)
 - [Установка clickhouse-backup](#установка)
 - [Настройка clickhouse-backup](#настройка)
 - [Резервное копирование](#резервное-копирование)
@@ -13,15 +13,15 @@
 
 ### Установка:
 
-Для установки `clickhouse-backup` выполните следующие шаги:
+- Для установки `clickhouse-backup` выполните следующие шаги:
 
-скачайте пакет из офф. репозитория [проекта](https://github.com/Altinity/clickhouse-backup/releases)  
-в сответствии с архитектурой вашей системы.  
-офлайн установка:
+- скачайте пакет из офф. репозитория [проекта](https://github.com/Altinity/clickhouse-backup/releases)  
+    в сответствии с архитектурой вашей системы.  
+- офлайн установка:
 ```sh
 wget https://github.com/Altinity/clickhouse-backup/releases/download/v2.4.33/clickhouse-backup-2.4.33-1.x86_64.rpm
 ```
-установите пакет  
+- установите пакет  
 ```sh
 sudo rpm -ivh clickhouse-backup-2.4.33-1.x86_64.rpm
 ```
@@ -29,8 +29,8 @@ sudo rpm -ivh clickhouse-backup-2.4.33-1.x86_64.rpm
 ### Настройка:
 
 
-После установки, настройте параметры подключения к кластеру ClickHouse в файле конфигурации `config.yaml`.  
-и какие схемы будут пропускаться при бэкапе
+- После установки, настройте параметры подключения к кластеру ClickHouse в файле конфигурации `config.yaml`.  
+    и какие схемы будут пропускаться при бэкапе
 - создайте файл 
 ```sh
 sudo cp /etc/clickhouse-backup/config.yml.example /etc/clickhouse-backup/config.yml
@@ -71,7 +71,7 @@ clickhouse:
     debug: false
 ```
 
-в секции general укаживается remote_storage и какое количество бэкапов будет хранится в ротации локально и в удаленном хосте (полный бэкап не удаляется если нужен в цепочке)
+- в секции general укаживается remote_storage и какое количество бэкапов будет хранится в ротации локально и в удаленном хосте (полный бэкап не удаляется если нужен в цепочке)
 ```
 general:
     remote_storage: sftp
@@ -82,8 +82,8 @@ general:
 
 ```
 
-в секции sftp укажем ip хоста для удаленного хранения бэкапов address: и дирректорию path:  
-а также способ авторизации по паролю или ключу, concurrency число потоков
+- в секции sftp укажем ip хоста для удаленного хранения бэкапов address: и дирректорию path:  
+    а также способ авторизации по паролю или ключу, concurrency число потоков
 ```
 sftp:
     address: "10.92.36.11"
@@ -97,24 +97,24 @@ sftp:
     debug: true
 ```
 
-создаем пользователя backupadmin в на хосте куда будут переноситься бэкапы и делаем его владельцем диррректории где будут хранится бэкапы
+- создаем пользователя backupadmin в на хосте куда будут переноситься бэкапы и делаем его владельцем диррректории где будут хранится бэкапы
 ```sh
 sudo chown backupadmin /backup_upload
 ```
-создаем пользователя в системе backupadmin где расположена база, создаем ключ и копируем публичный ключ на хост где будут хранится бэкапы
+- создаем пользователя в системе backupadmin где расположена база, создаем ключ и копируем публичный ключ на хост где будут хранится бэкапы
 ```sh
 sudo -u backupadmin ssh-keygen -t ed25519 -f /home/backupadmin/.ssh/id_ed25519_backupadmin
 ssh-copy-id -i /home/backupadmin/.ssh/id_ed25519_backupadmin.pub backupadmin@10.92.36.11
 ```
-clickhouse-backup может работать от root или от имени сервисной учетной записи clickhouse  
-логин backupadmin будет запускать скрипт bash через крон, в скрипте будет вызов `sudo -u clickhouse clickhouse-backup`  
-чтобы это работало дадим права sudo
+- clickhouse-backup может работать от root или от имени сервисной учетной записи clickhouse  
+    логин backupadmin будет запускать скрипт bash через крон, в скрипте будет вызов `sudo -u clickhouse clickhouse-backup`  
+    чтобы это работало дадим права sudo
 ```sh
 visudo
 backupadmin ALL=(ALL)  NOPASSWD: /bin/clickhouse-backup
 ```
-скопируем приватный ключ в дирректорию access чтобы он бэкапился вместе с разрешениями в базе  
-и сделаем clickhouse:clickhouse владельцами
+- скопируем приватный ключ в дирректорию access чтобы он бэкапился вместе с разрешениями в базе  
+    и сделаем clickhouse:clickhouse владельцами
 ```sh
 cp /home/backupadmin/.ssh/id_ed25519_backupadmin /opt/lib/clickhouse/access
 chown clickhouse:clickhouse /opt/lib/clickhouse/access/id_ed25519_backupadmin
@@ -195,7 +195,7 @@ else
     fi
 fi
 ```
-и даем права на выполнение для backupadmin
+- и даем права на выполнение для backupadmin
 ```sh
 sudo chown backupadmin /usr/local/bin/clickhouse-backup-run.sh
 sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
@@ -203,21 +203,21 @@ sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
 
 ### Резервное копирование
 
-для полного локального резервного копирования:
+- для полного локального резервного копирования:
 ```
 /usr/local/bin/clickhouse-backup-run.sh full local
 ```
 ***локальное инкрементальное резервное копирование не предусмотрено***
 
-для полного резервного копирования в удаленное хранилище:
+- для полного резервного копирования в удаленное хранилище:
 ```
 /usr/local/bin/clickhouse-backup-run.sh full remote
 ```
-для инкрементального резервного копирования в удаленное хранилище:
+- для инкрементального резервного копирования в удаленное хранилище:
 ```
 /usr/local/bin/clickhouse-backup-run.sh incremental remote
 ```
-под логином backupadmin
+- под логином backupadmin
 создаем задачи в cron `crontab -e`
 ```
 # Инкрементное резервное копирование каждые 3 часа, кроме 00:00 по воскресеньям.
@@ -225,20 +225,20 @@ sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
 # Полное резервное копирование в 00:00 по воскресеньям.
 0 0 * * 0 /usr/local/bin/clickhouse-backup-run.sh full remote
 ```
-смотрим логи
+- смотрим логи
 ``` 
 tail -n 50 -f /var/log/clickhouse-backup.log
 ```
 
 ###  Восстановление
 
-смотрим историю бэкапов в удаленном хранилище
+- смотрим историю бэкапов в удаленном хранилище
 
 ```sh
 sudo -u backupadmin clickhouse-backup list remote
 ```
-знак "+" обозначает зависимость от предыдущего бэкапа, цепочку формирует скрипт выше  [clickhouse-backup-run.sh](#размещаем)
-
+- знак "+" обозначает зависимость от предыдущего бэкапа, цепочку формирует скрипт выше  [clickhouse-backup-run.sh](#размещаем)
+---
 |       name                           |  size      |  date                |  locate |  dependency name                       |  compression    |
 |--------------------------------------|------------|----------------------|---------|----------------------------------------|-----------------|
 | auto_full_2024-03-05T14-30-01        |  472.71MiB |  05/03/2024 14:30:11 |  remote |                                        |  gzip, regular  |
@@ -248,4 +248,21 @@ sudo -u backupadmin clickhouse-backup list remote
 | auto_incremental_2024-03-05T14-50-02 |  1.04MiB   |  05/03/2024 14:50:03 |  remote |  +auto_incremental_2024-03-05T14-45-01 |  gzip, regular  |
 | auto_incremental_2024-03-05T14-55-01 |  1.04MiB   |  05/03/2024 14:55:02 |  remote |  +auto_incremental_2024-03-05T14-50-02 |  gzip, regular  |
 | auto_incremental_2024-03-05T15-00-01 |  1.04MiB   |  05/03/2024 15:00:02 |  remote |  +auto_incremental_2024-03-05T14-55-01 |  gzip, regular  |
+---
+- выбираем бэкап с нужном датой и запускам рестор, вся чепочка от полного бэкапа применится автоматически, и будут восстановлены дата, метаданные, праваи и конфиг файлы
+```sh
+sudo -u backupadmin clickhouse-backup restore_remote --drop --restore-rbac --configs "auto_incremental_2024-03-05T15-00-01" 
+```
 
+- если нужно восстановить отдельные таблицы и поместить их в другую схему для последующего сравнения
+```sh
+sudo -u backupadmin clickhouse-backup restore_remote \
+	-t 'default.foo,default.bar' \
+	-m 'default:default2' "auto_incremental_2024-03-05T15-00-01"
+``` 
+
+- восстановить только одну таблицу
+```sh
+sudo -u backupadmin clickhouse-backup restore_remote --drop \
+	-t 'default.foo' "auto_full_2024-03-05T14-30-01"
+```
