@@ -1,9 +1,10 @@
 [![Alt text](cat.png)](https://docs.arenadata.io/ru/ADQM/current/introduction/intro.html)
-## Документация по управлению бэкапами и ресторами кластера ADQM с помощью clickhouse-backup
+## Документация по управлению  
+## бэкапами и ресторами кластера ADQM с помощью clickhouse-backup
 
 ### Оглавление
 
-- [Тест и сравнение clickhouse-backup с Clickhouse Backup & Restore](test_clickhouse_backup.pdf)
+- [Тест и сравнение (Clickhouse-backup) с (Clickhouse Backup & Restore)](test_clickhouse_backup.pdf)
 - [Установка clickhouse-backup](#установка)
 - [Настройка clickhouse-backup](#настройка)
 - [Резервное копирование](#резервное-копирование)
@@ -249,7 +250,8 @@ sudo -u backupadmin clickhouse-backup list remote
 | auto_incremental_2024-03-05T14-55-01 |  1.04MiB   |  05/03/2024 14:55:02 |  remote |  +auto_incremental_2024-03-05T14-50-02 |  gzip, regular  |
 | auto_incremental_2024-03-05T15-00-01 |  1.04MiB   |  05/03/2024 15:00:02 |  remote |  +auto_incremental_2024-03-05T14-55-01 |  gzip, regular  |
 ---
-- выбираем бэкап с нужном датой и запускам рестор, вся чепочка от полного бэкапа применится автоматически, и будут восстановлены дата, метаданные, праваи и конфиг файлы
+- выбираем бэкап с нужном датой и запускам рестор, вся чепочка от полного бэкапа применится автоматически, и будут восстановлены данные,  
+    метаданные, права и и конфигурационные файлы
 ```sh
 sudo -u backupadmin clickhouse-backup restore_remote --drop --restore-rbac --configs "auto_incremental_2024-03-05T15-00-01" 
 ```
