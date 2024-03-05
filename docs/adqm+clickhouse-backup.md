@@ -158,7 +158,7 @@ BACKUP_HEALTH_CHECK=$BACKUP_HEALTH_CHECK
 if [[ $IS_FULL == true ]]; then
     echo "Starting full ($CREATE_COMMAND) backup" >> /var/log/clickhouse-backup.log 2>&1
     echo "Creating backup $BACKUP_NAME_FULL" >> /var/log/clickhouse-backup.log 2>&1
-    sudo -u clickhouse clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL --backup-rbac --backup-configs >> /var/log/clickhouse-backup.log 2>&1
+    sudo -u clickhouse clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL --backup-rbac --backup-configs
     exit_code=$?
     if [[ $exit_code != 0 ]]; then
         echo "clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL FAILED and return $exit_code exit code" >> /var/log/clickhouse-backup.log 2>&1
@@ -177,7 +177,7 @@ else
     # based on dates in auto generated backup names.
     BACKUP_NAME_PREV="$(sudo -u clickhouse clickhouse-backup list $2 | grep -E '^auto_' | tail -n 1 | cut -d " " -f 1)"
     echo "Creating backup $BACKUP_NAME_INCREMENTAL as diff from $BACKUP_NAME_PREV" >> /var/log/clickhouse-backup.log 2>&1
-    sudo -u clickhouse clickhouse-backup $CREATE_COMMAND --diff-from-remote=$BACKUP_NAME_PREV $BACKUP_NAME_INCREMENTAL --backup-rbac --backup-configs >> /var/log/clickhouse-backup.log 2>&1
+    sudo -u clickhouse clickhouse-backup $CREATE_COMMAND --diff-from-remote=$BACKUP_NAME_PREV $BACKUP_NAME_INCREMENTAL --backup-rbac --backup-configs
     exit_code=$?
     if [[ $exit_code != 0 ]]; then
         echo "clickhouse-backup create $BACKUP_NAME_INCREMENTAL FAILED and return $exit_code exit code" >> /var/log/clickhouse-backup.log 2>&1
@@ -197,13 +197,16 @@ fi
 sudo chown backupadmin /usr/local/bin/clickhouse-backup-run.sh
 sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
 ```
-под логином backupadmin
-создаем задачи в cron `crontab -e`
-```
-```
-
 
 ### Резервное копирование и восстановление
 
+под логином backupadmin
+создаем задачи в cron `crontab -e`
+```
+# Инкрементное резервное копирование каждые 3 часа, кроме 00:00 по воскресеньям.
+0 */3 * * 0-6 /usr/local/bin/clickhouse-backup-run.sh incremental remote
+# Полное резервное копирование в 00:00 по воскресеньям.
+0 0 * * 0 /usr/local/bin/clickhouse-backup-run.sh full remote
+```
 
 
