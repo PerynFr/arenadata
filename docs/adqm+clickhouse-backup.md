@@ -9,6 +9,7 @@
 - [Настройка clickhouse-backup](#настройка)
 - [Резервное копирование](#резервное-копирование)
 - [Восстановление](#восстановление)
+- [Дополнение](#дополнение)
 
 ---
 
@@ -134,7 +135,7 @@ sftp:
 ```bash
 #!/bin/bash
 # sudo vim /etc/default/clickhouse-backup-run.sh
-# full/incremental backup parameter
+# (full/incremental local/remote debug) backup parameter
 if [[ $1 == "full" ]]; then
     IS_FULL=true
 elif [[ $1 == "incremental" ]]; then
@@ -162,7 +163,11 @@ BACKUP_HEALTH_CHECK=$BACKUP_HEALTH_CHECK
 if [[ $IS_FULL == true ]]; then
     echo "Starting full ($CREATE_COMMAND) backup" >> /var/log/clickhouse-backup.log 2>&1
     echo "Creating backup $BACKUP_NAME_FULL" >> /var/log/clickhouse-backup.log 2>&1
-    sudo -u clickhouse clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL --backup-rbac --backup-configs
+    if [[ $3 == "debug" ]]; then
+        sudo -u clickhouse clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL --backup-rbac --backup-configs >> /var/log/clickhouse-backup.log 2>&1
+    else 
+        sudo -u clickhouse clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL --backup-rbac --backup-configs
+    fi
     exit_code=$?
     if [[ $exit_code != 0 ]]; then
         echo "clickhouse-backup $CREATE_COMMAND $BACKUP_NAME_FULL FAILED and return $exit_code exit code" >> /var/log/clickhouse-backup.log 2>&1
@@ -172,16 +177,20 @@ if [[ $IS_FULL == true ]]; then
          if [[ $2 == "remote" ]]; then
              sudo -u clickhouse clickhouse-backup delete local $BACKUP_NAME_FULL
              sudo -u clickhouse clickhouse-backup clean
-         fi    
+         fi
          echo "SUCCESS!!!" >> /var/log/clickhouse-backup.log 2>&1
     fi
 else
     echo "Starting incremental ($CREATE_COMMAND) backup" >> /var/log/clickhouse-backup.log 2>&1
-    # for incremental backup, take previous backup name 
+    # for incremental backup, take previous backup name
     # based on dates in auto generated backup names.
     BACKUP_NAME_PREV="$(sudo -u clickhouse clickhouse-backup list $2 | grep -E '^auto_' | tail -n 1 | cut -d " " -f 1)"
     echo "Creating backup $BACKUP_NAME_INCREMENTAL as diff from $BACKUP_NAME_PREV" >> /var/log/clickhouse-backup.log 2>&1
-    sudo -u clickhouse clickhouse-backup $CREATE_COMMAND --diff-from-remote=$BACKUP_NAME_PREV $BACKUP_NAME_INCREMENTAL --backup-rbac --backup-configs
+    if [[ $3 == "debug" ]]; then
+        sudo -u clickhouse clickhouse-backup $CREATE_COMMAND --diff-from-remote=$BACKUP_NAME_PREV $BACKUP_NAME_INCREMENTAL --backup-rbac --backup-configs >> /var/log/clickhouse-backup.log 2>&1
+    else 
+        sudo -u clickhouse clickhouse-backup $CREATE_COMMAND --diff-from-remote=$BACKUP_NAME_PREV $BACKUP_NAME_INCREMENTAL --backup-rbac --backup-configs
+    fi
     exit_code=$?
     if [[ $exit_code != 0 ]]; then
         echo "clickhouse-backup create $BACKUP_NAME_INCREMENTAL FAILED and return $exit_code exit code" >> /var/log/clickhouse-backup.log 2>&1
@@ -191,7 +200,7 @@ else
          if [[ $2 == "remote" ]]; then
             sudo -u clickhouse clickhouse-backup delete local $BACKUP_NAME_INCREMENTAL
             sudo -u clickhouse clickhouse-backup clean
-         fi   
+         fi
          echo "SUCCESS!!!" >> /var/log/clickhouse-backup.log 2>&1
     fi
 fi
@@ -226,6 +235,10 @@ sudo chmod u+x /usr/local/bin/clickhouse-backup-run.sh
 # Полное резервное копирование в 00:00 по воскресеньям.
 0 0 * * 0 /usr/local/bin/clickhouse-backup-run.sh full remote
 ```
+для записи отладки в лог можно добавить параметр в конце `debug`
+```
+0 0 * * 0 /usr/local/bin/clickhouse-backup-run.sh full remote debug
+```
 - смотрим логи
 ``` 
 tail -n 50 -f /var/log/clickhouse-backup.log
@@ -233,10 +246,12 @@ tail -n 50 -f /var/log/clickhouse-backup.log
 
 ###  Восстановление
 
-- смотрим историю бэкапов в удаленном хранилище
+- смотрим историю бэкапов в удаленном хранилище или локальном
 
 ```sh
-sudo -u backupadmin clickhouse-backup list remote
+sudo -u clickhouse clickhouse-backup list
+sudo -u clickhouse clickhouse-backup list local
+sudo -u clickhouse clickhouse-backup list remote
 ```
 - знак "+" обозначает зависимость от предыдущего бэкапа, цепочку формирует скрипт выше  [clickhouse-backup-run.sh](#размещаем)
 ---
@@ -266,7 +281,36 @@ sudo -u backupadmin clickhouse-backup restore_remote \
 - восстановить только одну таблицу
 ```sh
 sudo -u backupadmin clickhouse-backup restore_remote --drop \
-	-t 'default.foo' "auto_full_2024-03-05T14-30-01"
+	"auto_full_2024-03-05T14-30-01" -t 'default.foo' 
 ```
+
+- восстановить только одну базу
+```sh
+sudo -u clickhouse clickhouse-backup restore_remote \
+    "auto_full_2024-03-05T14-30-01" -t 'default.*'
+```
+### Дополнение
+
+- Для очистки потерянных данных в /var/lib/clickhouse/shadow:
+```sh
+sudo -u clickhouse clickhouse-backup clean
+```
+- разрешить пустые копии `allow_empty_backups: true`
+
+- Подробнее об инкрементном резервном копировании
+    минимальным элементом приращения для расчета приращения является data part name.
+    приращение будет расти, если вы часто используете 
+```
+OPTIMIZE... FINAL или ALTER.
+TABLE ... UPDATE / DELETE
+```
+- Приращение рассчитывается только на этапе загрузки
+    команда Create всегда создает полную резервную копию
+
+- Они создают много новых частей данных для существующих данных.
+    части, присутствующие в базовой резервной копии, помеченные как обязательные в файле `Metadata/db/table.json`.
+    во время загрузки необходимые части будут загружены из базы удаленного резервного копирования на локальный диск.
+
+- ClickHouse-backup создает жесткие ссылки в папке `backup_name/shadow` для завершения работы.
 
 ##### [к оглавлению](#оглавление)
