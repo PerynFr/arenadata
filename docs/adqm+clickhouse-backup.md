@@ -16,7 +16,33 @@
 ![Alt text](clickhouse.png)
 ### Установка:
 
-- Для установки `clickhouse-backup` выполните следующие шаги:
+- определим к конфигурацию кластера  
+    на любом из узлов через клиент `clickhouse-client -m`, где `-m` многострочный режим, выполните запрос:  
+```sql
+SELECT
+    cluster,
+    shard_num,
+    replica_num,
+    host_name
+FROM system.clusters;
+```
+- в полученном результате количество shard_num и их реплик
+```
+┌─cluster─────────┬─shard_num─┬─replica_num─┬─host_name────────────────────────┐
+│ default_cluster │         1 │           1 │ alex-adqmx1.ru-central1.internal │
+│ default_cluster │         1 │           2 │ alex-adqmx2.ru-central1.internal │
+│ default_cluster │         2 │           1 │ alex-adqmx3.ru-central1.internal │
+│ default_cluster │         2 │           2 │ alex-adqmx4.ru-central1.internal │
+└─────────────────┴───────────┴─────────────┴──────────────────────────────────┘
+```
+- бэкапить нужно каждый shard первую репилику, в этом случае  
+```
+┌─cluster─────────┬─shard_num─┬─replica_num─┬─host_name────────────────────────┐
+│ default_cluster │         1 │           1 │ alex-adqmx1.ru-central1.internal │
+│ default_cluster │         2 │           1 │ alex-adqmx3.ru-central1.internal │
+└─────────────────┴───────────┴─────────────┴──────────────────────────────────┘
+```
+- для установки `clickhouse-backup` выполните следующие шаги:
 
 - скачайте пакет из офф. репозитория [проекта](https://github.com/Altinity/clickhouse-backup/releases)  
     в сответствии с архитектурой вашей системы.  
