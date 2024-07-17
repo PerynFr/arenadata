@@ -418,7 +418,7 @@ OPTIONS (schema_name 'test', table_name 'table_1 .. table_10');
 ###### --------------------тестирование adb_tdw----------------------------------------------------------------
 ###### ===================================================================
 
-- соедиение по ключу в одной базе с разными таблицами однаковой стуктуры и размера в 2.9Gb
+- соедиение по ключу в одной базе для примера с разными таблицами однаковой стуктуры и размера в 2.9Gb
 ```sql
 explain analyze
 select
@@ -458,7 +458,7 @@ Execution time: 323.226 ms                                                      
 */
 ```
 
-- запрос в одной базе для примера
+- запрос в одной базе по всем столбцам для примера
 ```sql
 explain analyze
 select
@@ -570,9 +570,10 @@ id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field
  104|value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |0803e6e7fe6e7c10328ec6e5fbe1f6f2|5c570ec0122d3f73e6335d05491a3391|c8053075f063f011372fa3d5847c6264| 104|value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |8af19f83d88c6b266df95593dc8a9619|4894863c6b4d3638b84db432a6b8544b|cc54fb3ca671b2c65ba0e0c3d948a7fb|
  140|value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |9ffe3d49d0c198b064d74fde60af73fe|0a9b8c4ad38176aed652f0287a5a3ace|8bc1bc94716f6dfbedb7d2a714dcbc53| 140|value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |c9a1d36fac95befa9da80eb6c23c38fb|5b657bc368d4244cc1e46d5fc570de2b|d2c1c26349bc15af5ccb68578c62df52|
  180|value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |03e634fe4c2455dffa05759748dc8169|31f30b0494724339d69486e2f4dace73|fb146bbb32f7ace291430504e49216af| 180|value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |6259fc7603b2628495d519efc52a385c|c1239a3e313c12eb6d6347a25f3e5f3b|8d08f7861482bf93a1600d50e00e0d6b|
- . . . .  
- . . .  
- .  
+```
+. . . .  
+. . .  
+.    
 
 - фактическое время выполнения: первые 200 строк получено - 1.184s (1ms получ.), 2024-07-17 в 13:19:40  
 
