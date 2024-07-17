@@ -344,9 +344,9 @@ adb=# explain select count(*) from ft_a inner join ft_b on ft_a.id = ft_b.id whe
 Внедрение поддержи push-down функций агрегатов и соединений в следующей версии коннектора `adb_fdw` еще больше расширит области его применения, сократит объемы передаваемых данных и увеличит скорость взаимодействия в наиболее распространенных сценариях использования.
 
 
-#### --------------------------------------------------------------------------------------------------------   
-#### --------------подготовка к тестированию adb_tdw-----------------------------------  
-#### --------------------------------------------------------------------------------------------------------  
+###### ===================================================================
+###### ---------------------------подготовка к тестированию adb_tdw-----------------------------------  
+###### ===================================================================
 ##### фактура:
 
 - создано 10 баз test0..test10 
@@ -414,11 +414,11 @@ CREATE FOREIGN table if not exists test.test_0_test_1_rpdc .. test.test_0_test_1
 SERVER test_0_fdw
 OPTIONS (schema_name 'test', table_name 'table_1 .. table_10'); 
 ```
-##### --------------------------------------------------------------------------------------------------------
-##### --------------------тестирование adb_tdw--------------------------------------------------
-##### --------------------------------------------------------------------------------------------------------
+###### ===================================================================
+###### --------------------тестирование adb_tdw----------------------------------------------------------------
+###### ===================================================================
 
-- поключу в одной базе с разными таблицами однаковой стуктуры и размера в 2.9Gb
+- соедиение по ключу в одной базе с разными таблицами однаковой стуктуры и размера в 2.9Gb
 ```sql
 explain analyze
 select
@@ -428,12 +428,12 @@ from
 join test.table_2 t2 on
 	t1.id = t2.id ;
 ```
-результат:
-
+- результат:
+```
 count   |
 --------+
 10000000|
-
+```
 - фактическое время выполнения: 1 строк получено - 327ms, 2024-07-17 в 13:10:19
 
 ```
@@ -457,6 +457,8 @@ Optimizer: Pivotal Optimizer (GPORCA)                                           
 Execution time: 323.226 ms                                                                                                                |
 */
 ```
+
+- запрос в одной базе для примера
 ```sql
 explain analyze
 select
@@ -479,10 +481,10 @@ id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field
  290|value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |67ab630068fe99368ebafb6aa1aa3a57|0d5fb8ceba19f0d9e56f61fb9181dc2c|a166022c60e1dac8b6c656441aeb3f3d| 290|value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |value290 |046c200cee0ab5df72d30187e4d98d0b|aac8d5d640896cc018ff748d633a19e5|9e95f3a550a1c9661b8beb6793fedb95|
  363|value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |55077782744cccf5787cd0d374030e17|cdd59cdb0ee1a01f297c498bc2ba8b09|cd8dad17147b36dd5e0aef9e4da00ed1| 363|value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |value363 |095a29c919aaf99ae6c4c48ee7ddf850|baac2a69f116e9f05975d6ad4771d0da|a1cda7ef64618314217319d93d06820e|
  366|value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |6f1c106a3abb7f2485fb1f4df7cf937b|2f3f3670a9edf0846afb056103bcdda7|eb5943418d8be5640bcca858f9842b89| 366|value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |value366 |dd18391600dd09e35e4ea03d26dea551|8a8f5a4c99b5bb4644c382aadd367c3d|2841c4190fc5ad1cabb69f03794a6f18|
-```
-....
- ...
- ..
+ ```
+ . . . .  
+ . . .  
+ . 
  
 - фактическое время выполнения: первые 200 строк получено - 377ms (1ms получ.), 2024-07-17 в 13:10:54
 ```
@@ -504,7 +506,7 @@ Optimizer: Pivotal Optimizer (GPORCA)                                           
 Execution time: 5295.920 ms                                                                                                                   |                                                                                                               | 
  */
 ```
-- по ключу в одной базе с разными таблицами однаковой стуктуры и размера в 2.9Gb
+- по ключу в 2х базах с разными таблицами однаковой стуктуры и размера в 2.9Gb
 
 ```sql
 explain analyze
@@ -547,6 +549,7 @@ Optimizer: Postgres query optimizer                                             
 Execution time: 746.684 ms                                                                                                                                                 |  
  */
 ```
+- в разных базах
 ```sql
 explain analyze
 select
@@ -556,8 +559,7 @@ from
 join test.table_1 t1 on
 	test_1_rpdc.id = t1.id ;
 ```
-
-- результат:
+результат:
 ```
 id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field8   |field9   |field10  |field11  |field12  |field13                         |field14                         |field15                         |id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field8   |field9   |field10  |field11  |field12  |field13                         |field14                         |field15                         |
 ----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+
@@ -568,16 +570,13 @@ id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field
  104|value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |0803e6e7fe6e7c10328ec6e5fbe1f6f2|5c570ec0122d3f73e6335d05491a3391|c8053075f063f011372fa3d5847c6264| 104|value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |value104 |8af19f83d88c6b266df95593dc8a9619|4894863c6b4d3638b84db432a6b8544b|cc54fb3ca671b2c65ba0e0c3d948a7fb|
  140|value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |9ffe3d49d0c198b064d74fde60af73fe|0a9b8c4ad38176aed652f0287a5a3ace|8bc1bc94716f6dfbedb7d2a714dcbc53| 140|value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |value140 |c9a1d36fac95befa9da80eb6c23c38fb|5b657bc368d4244cc1e46d5fc570de2b|d2c1c26349bc15af5ccb68578c62df52|
  180|value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |03e634fe4c2455dffa05759748dc8169|31f30b0494724339d69486e2f4dace73|fb146bbb32f7ace291430504e49216af| 180|value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |value180 |6259fc7603b2628495d519efc52a385c|c1239a3e313c12eb6d6347a25f3e5f3b|8d08f7861482bf93a1600d50e00e0d6b|
-```
+ . . . .  
+ . . .  
+ .  
 
-. . . .  
-. .  
-.  
+- фактическое время выполнения: первые 200 строк получено - 1.184s (1ms получ.), 2024-07-17 в 13:19:40  
 
-  
-
-- фактическое время выполнения: первые 200 строк получено - 1.184s (1ms получ.), 2024-07-17 в 13:19:40
-```
+``` sql
 /*
 QUERY PLAN                                                                                                                                                       |
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -596,13 +595,13 @@ Planning time: 439.244 ms                                                       
   (slice2)    Executor memory: 139454K bytes avg x 40 workers, 139454K bytes max (seg0).  Work_mem: 76331K bytes max.                                            |
 Memory used:  1441792kB                                                                                                                                          |
 Optimizer: Postgres query optimizer                                                                                                                              |
-Execution time: 5484.591 ms                                                                                                                                      | * 
+Execution time: 5484.591 ms                                                                                                                                      | 
  */
-``` 
-##### промежуточный вывод, при подсчете строк соединением по индексу скорость работы в одной базе быстрее в ~2 раза (Execution time: 323.226 ms  746.684 ms)
-при получении строк соединением по индексу двух таблиц в одной базе и в разных базах скорость получения всех данных ~ одинаковая (Execution time: 5295.920 ms 5484.591 ms)
+```
 
-- по ключу в одной базе с разными таблицами однаковой стуктуры и размера в 2.9Gb
+##### промежуточный вывод, при подсчете строк соединением по индексу скорость работы в одной базе быстрее в ~2 раза (Execution time: 323.226 ms  746.684 ms)
+
+- по ключу в одной базе с 4мя разными таблицами однаковой стуктуры и размера в 2.9Gb
 
 ```sql
 explain analyze
@@ -629,7 +628,6 @@ id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field
 ----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+
 3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|fa9e551973bd23b57625e6c1f933fb78|95cf2e57c6b96bc9a16054b5c8675596|1cf2882e483917abab22cea694493335|3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|fd2bdcbe654dfa3ba8129d2383a42ce5|961cc272190008cfcc9c0c80eb266e8f|4aeff83045501d5b7984455f359c1eb7|	
 ```
-
 - фактическое время выполнения: 1 строк получено - 464ms, 2024-07-17 в 13:21:06
 ```
 /*
@@ -668,8 +666,7 @@ Optimizer: Pivotal Optimizer (GPORCA)                                           
 Execution time: 318.285 ms                                                                                                                                           |
  */
 ```
-
-- по 3 полям колонкам в разных базах с разными таблицами однаковой стуктуры первая таблица adb_fdw и размера в 2.9Gb
+- по 3 колонкам в разных базах с 4мя разными таблицами однаковой стуктуры первая таблица adb_fdw и размера в 2.9Gb
 
 ```sql
 explain analyze
@@ -696,7 +693,7 @@ id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field
 ----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+
 3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|fa9e551973bd23b57625e6c1f933fb78|95cf2e57c6b96bc9a16054b5c8675596|1cf2882e483917abab22cea694493335|3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|fd2bdcbe654dfa3ba8129d2383a42ce5|961cc272190008cfcc9c0c80eb266e8f|4aeff83045501d5b7984455f359c1eb7|	
 ```
-  
+
 - фактическое время выполнения: 1 строк получено - 1.979s, 2024-07-17 в 13:22:50	
 ```
 /*
@@ -731,8 +728,9 @@ Planning time: 449.745 ms
 Memory used:  1441792kB                                                                                                                                               
 Optimizer: Postgres query optimizer                                                                                                                                   
 Execution time: 1617.063 ms                                                                                                                                           
- */	
+ */
 ```
+
 - по 3 полям колонкам в разных базах с разными таблицами однаковой стуктуры с условием where, последня таблица adb_fdw и размера в 2.9Gb
 
 ```sql
@@ -796,7 +794,6 @@ Optimizer: Postgres query optimizer                                             
 Execution time: 1658.774 ms                                                                                                                                   | 
  */
 ```
-
 - по 3 полям колонкам в разных базах с разными таблицами однаковой стуктуры с условием where, первые 3 таблицы adb_fdw 4я локальная и все размера в 2.9Gb
 
 ```sql
@@ -823,8 +820,9 @@ where
 id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field8   |field9   |field10  |field11  |field12  |field13                         |field14                         |field15                         |id  |field1   |field2   |field3   |field4   |field5   |field6   |field7   |field8   |field9   |field10  |field11  |field12  |field13                         |field14                         |field15                         |
 ----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+----+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+--------------------------------+--------------------------------+--------------------------------+
 3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|fa9e551973bd23b57625e6c1f933fb78|95cf2e57c6b96bc9a16054b5c8675596|1cf2882e483917abab22cea694493335|3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|value3941|fd2bdcbe654dfa3ba8129d2383a42ce5|961cc272190008cfcc9c0c80eb266e8f|4aeff83045501d5b7984455f359c1eb7|	
-
-фактическое время выполнения: 1 строк получено - 3.317s, 2024-07-17 в 13:24:24		
+```
+- фактическое время выполнения: 1 строк получено - 3.317s, 2024-07-17 в 13:24:24		
+```
 /*
 QUERY PLAN                                                                                                                                                            |
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -857,13 +855,12 @@ Optimizer: Postgres query optimizer                                             
 Execution time: 1773.933 ms                                                                                                                                           |
 */
 ```
-
 - время зароса почти не зависит сколько таблиц adb_fdw будет в запросе 1 или 3 по сравнения с 1й и 3мя локальными
 
-##### ---------------------------------------------------------------------------------------------------------------------------------
-##### запрос который запускается на test_10 базе, и выбирает данные из 10 таблиц в базе test_0, c условиями по полям из всех таблиц
-##### в таблицах только первичный ключ, других индексов нет
-##### ---------------------------------------------------------------------------------------------------------------------------------
+###### --------------------------------------------------------------------------------------------------------------------------------------------
+###### запрос который запускается на test_10 базе, и выбирает данные из 10 таблиц в базе test_0, c условиями по полям из всех таблиц
+###### в таблах только первичный ключ, других индексов нет
+###### --------------------------------------------------------------------------------------------------------------------------------------------
 
 ```sql
 explain analyze
@@ -999,4 +996,139 @@ Planning time: 24222.503 ms                                                     
   (slice7)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
   (slice8)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
   (slice9)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
-  ```
+  
+```
+###### ------------------------------------------------------------------------------------------------------------------------------------------
+###### запрос который запускается на test_10 базе, и выбирает данные из 5 таблиц в базе test_0 и выбирает данные из 5 таблиц в базе test_10, c условиями по полям из всех таблиц
+###### в таблицах только первичный ключ, других индексов нет
+###### ------------------------------------------------------------------------------------------------------------------------------------------
+```sql
+explain analyze
+SELECT
+    a.id,
+    b.field1,
+    c.field2, 
+    d.field3,
+    e.field4,
+    f.field5,
+    g.field6,
+    h.field7,
+    i.field8,
+    j.field9
+FROM
+    test.test_0_test_1_rpdc a
+JOIN
+    test.test_0_test_2_rpdc b ON a.id = b.id
+JOIN
+    test.test_0_test_3_rpdc c ON a.id = c.id
+JOIN
+    test.test_0_test_4_rpdc d ON a.id = d.id
+JOIN
+    test.test_0_test_5_rpdc e ON a.id = e.id
+JOIN
+    test.table_1  f ON a.id = f.id
+JOIN
+    test.table_2 g ON a.id = g.id
+JOIN
+    test.table_3 h ON a.id = h.id
+JOIN
+    test.table_4 i ON a.id = i.id
+JOIN
+    test.table_5 j ON a.id = j.id
+WHERE
+    a.field1 = 'value853' AND
+    b.field2 = 'value853' AND
+    c.field3 = 'value853' AND
+    d.field4 = 'value853' AND
+    e.field5 = 'value853' AND
+    f.field6 = 'value853' AND
+    g.field7 = 'value853' AND
+    h.field8 = 'value853' AND
+    i.field9 = 'value853' AND
+    j.field10 = 'value853';
+```   
+- результат:
+```
+id |field1  |field2  |field3  |field4  |field5  |field6  |field7  |field8  |field9  |
+---+--------+--------+--------+--------+--------+--------+--------+--------+--------+
+853|value853|value853|value853|value853|value853|value853|value853|value853|value853|
+```
+- фактическое время выполнения: 1 строк получено - 13.797s, 2024-07-17 в 13:04:07
+
+```	
+QUERY PLAN                                                                                                                                                                                         |
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+Gather Motion 40:1  (slice6; segments: 40)  (cost=858159.58..1071985.71 rows=4 width=148) (actual time=298.053..298.054 rows=1 loops=1)                                                            |
+  ->  Hash Join  (cost=858159.58..1071985.71 rows=1 width=148) (actual time=227.742..297.350 rows=1 loops=1)                                                                                       |
+        Hash Cond: (a.id = i.id)                                                                                                                                                                   |
+        Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                                                          |
+        ->  Hash Join  (cost=644346.22..858172.30 rows=1 width=132) (actual time=164.983..234.055 rows=1 loops=1)                                                                                  |
+              Hash Cond: (a.id = h.id)                                                                                                                                                             |
+              Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                                                    |
+              ->  Hash Join  (cost=430530.28..644356.32 rows=1 width=116) (actual time=107.106..175.623 rows=1 loops=1)                                                                            |
+                    Hash Cond: (a.id = g.id)                                                                                                                                                       |
+                    Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                                              |
+                    ->  Hash Join  (cost=216710.68..430536.67 rows=1 width=100) (actual time=66.488..134.490 rows=1 loops=1)                                                                       |
+                          Hash Cond: (a.id = f.id)                                                                                                                                                 |
+                          Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                                        |
+                          ->  Hash Join  (cost=2886.83..216712.78 rows=1 width=84) (actual time=2.757..70.212 rows=1 loops=1)                                                                      |
+                                Hash Cond: (a.id = e.id)                                                                                                                                           |
+                                Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                                  |
+                                ->  Hash Join  (cost=2309.46..216135.36 rows=1 width=68) (actual time=2.181..69.099 rows=1 loops=1)                                                                |
+                                      Hash Cond: (a.id = d.id)                                                                                                                                     |
+                                      Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                            |
+                                      ->  Hash Join  (cost=1732.10..215557.95 rows=1 width=52) (actual time=1.654..68.029 rows=1 loops=1)                                                          |
+                                            Hash Cond: (a.id = c.id)                                                                                                                               |
+                                            Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                      |
+                                            ->  Hash Join  (cost=1154.73..214980.54 rows=1 width=36) (actual time=1.110..66.957 rows=1 loops=1)                                                    |
+                                                  Hash Cond: (a.id = b.id)                                                                                                                         |
+                                                  Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                                |
+                                                  ->  Hash Join  (cost=577.36..214403.12 rows=1 width=20) (actual time=0.589..65.891 rows=1 loops=1)                                               |
+                                                        Hash Cond: (j.id = a.id)                                                                                                                   |
+                                                        Extra Text: (seg0)   Hash chain length 1.0 avg, 1 max, using 1 of 524288 buckets.                                                          |
+                                                        ->  Seq Scan on table_5 j  (cost=0.00..213825.73 rows=1 width=16) (actual time=0.063..64.842 rows=1 loops=1)                               |
+                                                              Filter: (field10 = 'value853'::text)                                                                                                 |
+                                                        ->  Hash  (cost=577.35..577.35 rows=1 width=4) (actual time=0.049..0.049 rows=1 loops=1)                                                   |
+                                                              ->  Redistribute Motion 40:40  (slice1; segments: 40)  (cost=100.00..577.35 rows=1 width=4) (actual time=0.029..0.048 rows=1 loops=1)|
+                                                                    Hash Key: a.id                                                                                                                 |
+                                                                    ->  Foreign Scan on test_0_test_1_rpdc a  (cost=100.00..577.33 rows=1 width=4) (actual time=21.569..21.638 rows=1 loops=1)     |
+                                                  ->  Hash  (cost=577.36..577.36 rows=1 width=16) (actual time=0.049..0.049 rows=1 loops=1)                                                        |
+                                                        ->  Redistribute Motion 40:40  (slice2; segments: 40)  (cost=100.00..577.36 rows=1 width=16) (actual time=0.030..0.047 rows=1 loops=1)     |
+                                                              Hash Key: b.id                                                                                                                       |
+                                                              ->  Foreign Scan on test_0_test_2_rpdc b  (cost=100.00..577.34 rows=1 width=16) (actual time=21.916..21.994 rows=1 loops=1)          |
+                                            ->  Hash  (cost=577.35..577.35 rows=1 width=16) (actual time=0.049..0.049 rows=1 loops=1)                                                              |
+                                                  ->  Redistribute Motion 40:40  (slice3; segments: 40)  (cost=100.00..577.35 rows=1 width=16) (actual time=0.030..0.048 rows=1 loops=1)           |
+                                                        Hash Key: c.id                                                                                                                             |
+                                                        ->  Foreign Scan on test_0_test_3_rpdc c  (cost=100.00..577.33 rows=1 width=16) (actual time=21.183..21.261 rows=1 loops=1)                |
+                                      ->  Hash  (cost=577.35..577.35 rows=1 width=16) (actual time=0.049..0.049 rows=1 loops=1)                                                                    |
+                                            ->  Redistribute Motion 40:40  (slice4; segments: 40)  (cost=100.00..577.35 rows=1 width=16) (actual time=0.030..0.048 rows=1 loops=1)                 |
+                                                  Hash Key: d.id                                                                                                                                   |
+                                                  ->  Foreign Scan on test_0_test_4_rpdc d  (cost=100.00..577.33 rows=1 width=16) (actual time=22.129..22.208 rows=1 loops=1)                      |
+                                ->  Hash  (cost=577.36..577.36 rows=1 width=16) (actual time=0.056..0.056 rows=1 loops=1)                                                                          |
+                                      ->  Redistribute Motion 40:40  (slice5; segments: 40)  (cost=100.00..577.36 rows=1 width=16) (actual time=0.035..0.054 rows=1 loops=1)                       |
+                                            Hash Key: e.id                                                                                                                                         |
+                                            ->  Foreign Scan on test_0_test_5_rpdc e  (cost=100.00..577.34 rows=1 width=16) (actual time=22.390..22.468 rows=1 loops=1)                            |
+                          ->  Hash  (cost=213823.84..213823.84 rows=1 width=16) (actual time=63.237..63.237 rows=1 loops=1)                                                                        |
+                                ->  Seq Scan on table_1 f  (cost=0.00..213823.84 rows=1 width=16) (actual time=0.035..63.232 rows=1 loops=1)                                                       |
+                                      Filter: (field6 = 'value853'::text)                                                                                                                          |
+                    ->  Hash  (cost=213819.59..213819.59 rows=1 width=16) (actual time=40.117..40.117 rows=1 loops=1)                                                                              |
+                          ->  Seq Scan on table_2 g  (cost=0.00..213819.59 rows=1 width=16) (actual time=0.040..40.114 rows=1 loops=1)                                                             |
+                                Filter: (field7 = 'value853'::text)                                                                                                                                |
+              ->  Hash  (cost=213815.92..213815.92 rows=1 width=16) (actual time=57.347..57.347 rows=1 loops=1)                                                                                    |
+                    ->  Seq Scan on table_3 h  (cost=0.00..213815.92 rows=1 width=16) (actual time=0.053..57.344 rows=1 loops=1)                                                                   |
+                          Filter: (field8 = 'value853'::text)                                                                                                                                      |
+        ->  Hash  (cost=213813.35..213813.35 rows=1 width=16) (actual time=62.165..62.165 rows=1 loops=1)                                                                                          |
+              ->  Seq Scan on table_4 i  (cost=0.00..213813.35 rows=1 width=16) (actual time=0.141..62.161 rows=1 loops=1)                                                                         |
+                    Filter: (field9 = 'value853'::text)                                                                                                                                            |
+Planning time: 12245.342 ms                                                                                                                                                                        |
+  (slice0)    Executor memory: 1140K bytes.                                                                                                                                                        |
+  (slice1)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
+  (slice2)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
+  (slice3)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
+  (slice4)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
+  (slice5)    Executor memory: 62K bytes avg x 40 workers, 62K bytes max (seg0).                                                                                                                   |
+  (slice6)    Executor memory: 5193K bytes avg x 40 workers, 37322K bytes max (seg0).  Work_mem: 1K bytes max.                                                                                     |
+Memory used:  1441792kB                                                                                                                                                                            |
+Optimizer: Postgres query optimizer                                                                                                                                                                |
+Execution time: 1478.402 ms                                                                                                                                                                        |
+```	
