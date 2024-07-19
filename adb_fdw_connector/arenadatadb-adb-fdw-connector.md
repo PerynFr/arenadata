@@ -382,7 +382,7 @@ DISTRIBUTED BY (id);
 CREATE SERVER test_0_fdw
 FOREIGN DATA WRAPPER adb_fdw
 OPTIONS (
-  host 'ndp-v01dgl-dm',
+  host 'test_host',
   port '5432',
   dbname 'test_0',
   use_remote_estimate 'true');    
